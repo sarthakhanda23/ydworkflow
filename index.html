@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Yogi Ji Digi - Project Execution Workflow</title>
     <style>
         /* === YOGI JI DIGI CORPORATE PALETTE === */
@@ -12,11 +12,25 @@
             --yd-grey: #5A6360;       /* Exact Logo Grey */
             --yd-light-grey: #f4f6f8;
             --bg-gradient: radial-gradient(circle at top right, #ffffff, #e3e8ec);
-            
+            --grid-color: rgba(90, 99, 96, 0.05);
             --card-bg: rgba(255, 255, 255, 0.75); /* Futuristic Glass */
             --text-main: #2c3e50;
             --text-muted: #546e7a;
             --success-green: #27ae60;
+            --header-bg: rgba(255, 255, 255, 0.9);
+            --info-bg: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(244,246,248,0.9) 100%);
+        }
+
+        /* === DARK MODE PALETTE === */
+        body.dark-mode {
+            --yd-light-grey: #2d3748;
+            --bg-gradient: radial-gradient(circle at top right, #1a1e21, #0d1113);
+            --grid-color: rgba(255, 255, 255, 0.03);
+            --card-bg: rgba(30, 35, 40, 0.85);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --header-bg: rgba(20, 24, 28, 0.9);
+            --info-bg: linear-gradient(135deg, rgba(30,35,40,0.9) 0%, rgba(20,24,28,0.9) 100%);
         }
 
         /* === GLOBAL RESET & NO-SCROLL LOCK === */
@@ -25,17 +39,19 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             width: 100vw;
             height: 100vh;
-            overflow: hidden; /* STRICT NO SCROLLING */
+            overflow: hidden; /* STRICT NO SCROLLING ON DESKTOP */
             background: var(--bg-gradient);
             color: var(--text-main);
             display: flex;
             flex-direction: column;
             position: relative;
+            transition: background 0.4s ease, color 0.4s ease;
         }
 
         /* Futuristic Background animated grid */
@@ -43,11 +59,12 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-image: linear-gradient(rgba(90, 99, 96, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(90, 99, 96, 0.05) 1px, transparent 1px);
+            background-image: linear-gradient(var(--grid-color) 1px, transparent 1px),
+            linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
             background-size: 3vw 3vw;
             z-index: -1;
             animation: gridMove 20s linear infinite;
+            transition: background-image 0.4s ease;
         }
 
         /* === HEADER === */
@@ -57,11 +74,18 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 3vw;
-            background: rgba(255, 255, 255, 0.9);
+            background: var(--header-bg);
             backdrop-filter: blur(10px);
             border-bottom: 2px solid var(--yd-red);
             box-shadow: 0 4px 15px rgba(175, 32, 45, 0.1);
             z-index: 100;
+            transition: background 0.4s ease;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .logo {
@@ -70,9 +94,30 @@
             object-fit: contain;
             animation: slideInLeft 1s ease-out;
             cursor: pointer;
-            transition: transform 0.3s;
+            transition: transform 0.3s, filter 0.4s;
         }
         .logo:hover { transform: scale(1.05); }
+        body.dark-mode .logo { filter: brightness(0) invert(1) opacity(0.9); }
+
+        /* Dark Mode Toggle */
+        .theme-switch {
+            background: var(--yd-light-grey);
+            border: 1px solid var(--yd-grey);
+            border-radius: 20px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+        .theme-switch:hover {
+            border-color: var(--yd-red);
+            color: var(--yd-red);
+        }
 
         .title-box { text-align: right; }
         .title-box h1 {
@@ -86,6 +131,23 @@
             font-size: clamp(0.85rem, 1vw, 1.2rem);
             color: var(--yd-grey);
             font-weight: 600;
+        }
+
+        /* === PROGRESS INDICATOR (Hidden on Desktop) === */
+        .progress-container {
+            display: none;
+            width: 100%;
+            height: 4px;
+            background: var(--yd-light-grey);
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--yd-red);
+            width: 0%;
+            transition: width 0.2s ease;
         }
 
         /* === MAIN GRID LAYOUT === */
@@ -110,7 +172,7 @@
         .stage-3a { grid-column: 3; grid-row: 2; }
         .stage-6 { grid-column: 5; grid-row: 2; }
 
-        /* === CARD STYLING (Glassmorphism + Animations) === */
+        /* === CARD STYLING === */
         .card {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
@@ -123,7 +185,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.03);
             position: relative;
             cursor: default;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.4s, border 0.4s;
             opacity: 0;
             animation: fadeUp 0.8s forwards;
         }
@@ -155,10 +217,25 @@
             padding-bottom: 0.5vh;
             margin-bottom: 0.8vh;
             text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Mobile toggle icon (hidden on desktop) */
+        .toggle-icon { display: none; font-size: 1rem; color: var(--yd-red); transition: transform 0.3s; }
+
+        /* Wrapper for mobile accordion */
+        .collapsible-content {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            overflow: hidden;
         }
 
         .roster {
-            background: rgba(90, 99, 96, 0.06);
+            background: rgba(128, 128, 128, 0.08);
             padding: 0.8vh 0.6vw;
             border-radius: 6px;
             margin-bottom: 0.8vh;
@@ -216,6 +293,8 @@
             color: var(--yd-dark-red);
             transition: background 0.3s;
         }
+        body.dark-mode .sla-box { color: #ff8c94; background: rgba(175, 32, 45, 0.15); }
+        
         .card:hover .sla-box {
             background: rgba(175, 32, 45, 0.1);
             animation: pulseAlert 2s infinite;
@@ -223,7 +302,7 @@
 
         /* === GLOBAL INFO PANEL === */
         .info-panel {
-            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(244,246,248,0.9) 100%);
+            background: var(--info-bg);
             display: flex;
             justify-content: space-around;
             align-items: center;
@@ -231,7 +310,7 @@
         .info-block {
             flex: 1;
             padding: 0 1vw;
-            border-right: 1px solid rgba(0,0,0,0.1);
+            border-right: 1px solid rgba(128,128,128,0.2);
         }
         .info-block:last-child { border-right: none; }
         
@@ -261,8 +340,8 @@
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
+            flex-shrink: 0;
         }
-        /* Glowing line top of footer */
         footer::before {
             content: '';
             position: absolute;
@@ -271,10 +350,10 @@
             background: var(--yd-red);
             box-shadow: 0 0 10px var(--yd-red);
         }
-        .footer-note { font-weight: 400; }
+        .footer-note { font-weight: 400; text-align: center; padding: 0 10px; }
         .footer-note strong { font-weight: 700; color: #ffcccc; }
 
-        /* === ANIMATED FLOW ARROWS === */
+        /* === ANIMATED FLOW ARROWS (Desktop) === */
         .arrow {
             position: absolute;
             color: var(--yd-red);
@@ -285,7 +364,6 @@
             text-shadow: 0 0 5px rgba(175, 32, 45, 0.4);
         }
 
-        /* Advanced Grid Placements for Arrows */
         .arrow-0-1 { top: 50%; right: -1vw; transform: translateY(-50%); }
         .arrow-1-2 { top: 50%; right: -1vw; transform: translateY(-50%); }
         .arrow-2-4 { top: 25%; right: -1.2vw; transform: translateY(-50%); }
@@ -294,7 +372,6 @@
         .arrow-4-5 { top: 50%; right: -1vw; transform: translateY(-50%); }
         .arrow-5-6 { bottom: -2.5vh; left: 50%; transform: translateX(-50%) rotate(90deg); animation: flowDown 2s infinite ease-in-out;}
 
-        /* Labels for Branching */
         .label {
             position: absolute;
             font-size: clamp(0.6rem, 0.7vw, 0.8rem);
@@ -340,12 +417,136 @@
             0% { background-position: 0 0; }
             100% { background-position: 3vw 3vw; }
         }
+
+        /* ============================= */
+        /* 📱 MOBILE RESPONSIVE MODE     */
+        /* ============================= */
+        @media (max-width: 1024px) {
+
+            body {
+                height: auto;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
+            .progress-container { display: block; }
+
+            header {
+                height: auto;
+                flex-direction: column;
+                padding: 1rem;
+                text-align: center;
+                gap: 15px;
+                position: relative;
+            }
+            .logo-container {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .logo { height: 50px; }
+            .title-box { text-align: center; }
+
+            /* App-like Swipe Snapping */
+            main {
+                display: flex;
+                flex-direction: column;
+                gap: 25px;
+                padding: 20px;
+                scroll-snap-type: y mandatory;
+            }
+
+            .card {
+                width: 100%;
+                min-height: auto;
+                animation: fadeUp 0.6s forwards;
+                scroll-snap-align: start;
+                scroll-margin-top: 20px;
+            }
+
+            /* Tap to expand accordion logic */
+            .toggle-icon { display: block; }
+            .card-header { cursor: pointer; user-select: none; margin-bottom: 0; padding-bottom: 0.8vh;}
+            
+            /* By default on mobile, collapse content */
+            .collapsible-content {
+                max-height: 0;
+                opacity: 0;
+                margin-top: 0;
+            }
+            
+            /* Expanded state */
+            .card.active .collapsible-content {
+                max-height: 500px;
+                opacity: 1;
+                margin-top: 1vh;
+            }
+            .card.active .toggle-icon {
+                transform: rotate(180deg);
+            }
+
+            /* Remove complex grid placement */
+            .stage-0, .stage-1, .stage-2, .stage-3a, .stage-4, .stage-5, .stage-6, .info-panel {
+                grid-column: auto !important;
+                grid-row: auto !important;
+            }
+
+            /* Hide desktop arrows & branch labels */
+            .arrow, .label { display: none; }
+
+            /* Add simple vertical downward connector */
+            .card::after {
+                content: "⬇";
+                position: absolute;
+                bottom: -22px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 20px;
+                color: var(--yd-red);
+                animation: flowDownMobile 1.5s infinite ease-in-out;
+            }
+
+            /* Remove arrow after the last element */
+            .info-panel::after, .stage-6::after { display: none; }
+
+            .info-panel {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            .info-block {
+                border-right: none;
+                border-bottom: 1px solid rgba(128,128,128,0.2);
+                width: 100%;
+                padding-bottom: 10px;
+            }
+            .info-block:last-child { border-bottom: none; padding-bottom: 0;}
+
+            footer {
+                height: auto;
+                padding: 15px 10px;
+            }
+        }
+
+        /* Mobile arrow animation */
+        @keyframes flowDownMobile {
+            0% { transform: translate(-50%, 0); opacity: 0.6; }
+            50% { transform: translate(-50%, 6px); opacity: 1; text-shadow: 0 0 8px var(--yd-red);}
+            100% { transform: translate(-50%, 0); opacity: 0.6; }
+        }
+
     </style>
 </head>
 <body>
 
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
     <header>
-        <img src="YDLOGO.png" alt="Yogi Ji Digi Logo" class="logo">
+        <div class="logo-container">
+            <img src="YDLOGO.png" alt="Yogi Ji Digi Logo" class="logo">
+            <button class="theme-switch" id="theme-toggle">🌙 Dark Mode</button>
+        </div>
         <div class="title-box">
             <h1>Project Execution Workflow</h1>
             <p>End-to-End Lifecycle Matrix</p>
@@ -353,155 +554,234 @@
     </header>
 
     <main>
-        <div class="card stage-0">
-            <div class="card-header">STAGE 0: Initiation</div>
-            <div class="roster">
-                <div class="roster-title">Sales Team</div>
-                <ul class="names">
-                    <li>Mr. Manish Gupta</li>
-                    <li>Shashikanth Tripathi</li>
-                </ul>
-            </div>
-            <div class="action-text">
-                Leadership hands over order to Sales to initiate on <strong>ydproject.ydagchmi.com/kickoff</strong>.<br><br>
-                Submit Client name, site, product & S.O Number. Choose if Electrical Design only.
+        <div class="card stage-0 active">
+            <div class="card-header">STAGE 0: Initiation <span class="toggle-icon">▼</span></div>
+            <div class="collapsible-content">
+                <div class="roster">
+                    <div class="roster-title">Sales Team</div>
+                    <ul class="names">
+                        <li>Mr. Manish Gupta</li>
+                        <li>Shashikanth Tripathi</li>
+                    </ul>
+                </div>
+                <div class="action-text">
+                    Leadership hands over order to Sales to initiate on <strong>ydproject.ydagchmi.com/kickoff</strong>.<br><br>
+                    Submit Client name, site, product & S.O Number. Choose if Electrical Design only.
+                </div>
             </div>
             <div class="arrow arrow-0-1">➔</div>
         </div>
 
         <div class="card stage-1">
-            <div class="card-header">STAGE 1: Project # Allocation</div>
-            <div class="roster">
-                <div class="roster-title">Design Team</div>
-                <ul class="names">
-                    <li>Mr. SK Tripathi <span>(Director)</span></li>
-                    <li>Surajpal Singh <span>(Electrical)</span></li>
-                    <li>Sanjay N. & Krishna P. <span>(Mumbai)</span></li>
-                    <li>Vinit J, Smith K, Brijraj <span>(Mech)</span></li>
-                </ul>
-            </div>
-            <div class="action-text">
-                Allocate Project Number from PDM and enter description of the product.
-            </div>
-            <div class="sla-box">
-                ⏱️ SLA: <strong>24 Hours</strong><br>
-                ⚠️ Escalate: Mr. Navneet Singh & Mr. Sameer Bansal
+            <div class="card-header">STAGE 1: Project # Allocation <span class="toggle-icon">▼</span></div>
+            <div class="collapsible-content">
+                <div class="roster">
+                    <div class="roster-title">Design Team</div>
+                    <ul class="names">
+                        <li>Mr. SK Tripathi <span>(Director)</span></li>
+                        <li>Surajpal Singh <span>(Electrical)</span></li>
+                        <li>Sanjay N. & Krishna P. <span>(Mumbai)</span></li>
+                        <li>Vinit J, Smith K, Brijraj <span>(Mech)</span></li>
+                    </ul>
+                </div>
+                <div class="action-text">
+                    Allocate Project Number from PDM and enter description of the product.
+                </div>
+                <div class="sla-box">
+                    ⏱️ SLA: <strong>24 Hours</strong><br>
+                    ⚠️ Escalate: Mr. Navneet Singh & Mr. Sameer Bansal
+                </div>
             </div>
             <div class="arrow arrow-1-2">➔</div>
         </div>
 
         <div class="card stage-2">
-            <div class="card-header" style="background:var(--yd-red); color:white; padding: 0.5vh; border-radius:6px; text-align:center;">STAGE 2: Director's Decision</div>
-            <div class="roster">
-                <div class="roster-title">Directors</div>
-                <ul class="names">
-                    <li>Mr. Navneet Singh</li>
-                    <li>Mr. Sameer Bansal</li>
-                </ul>
-            </div>
-            <div class="action-text" style="text-align: center; margin-top: 1vh;">
-                <strong>Select Project Path:</strong><br><br>
-                <span style="color:var(--success-green);">● Proceed AFTER Advance</span><br>
-                <span style="color:var(--yd-grey);">● Proceed WITHOUT Advance</span>
+            <div class="card-header" style="background:var(--yd-red); color:white; padding: 0.5vh 1vh; border-radius:6px;">STAGE 2: Director's Decision <span class="toggle-icon" style="color:white;">▼</span></div>
+            <div class="collapsible-content">
+                <div class="roster">
+                    <div class="roster-title">Directors</div>
+                    <ul class="names">
+                        <li>Mr. Navneet Singh</li>
+                        <li>Mr. Sameer Bansal</li>
+                    </ul>
+                </div>
+                <div class="action-text" style="text-align: center; margin-top: 1vh;">
+                    <strong>Select Project Path:</strong><br><br>
+                    <span style="color:var(--success-green);">● Proceed AFTER Advance</span><br>
+                    <span style="color:var(--text-muted);">● Proceed WITHOUT Advance</span>
+                </div>
             </div>
             <div class="arrow arrow-2-4">➔</div><span class="label label-no-adv">NO ADVANCE</span>
             <div class="arrow arrow-2-3a">➔</div><span class="label label-adv">ADVANCE</span>
         </div>
 
         <div class="card stage-3a">
-            <div class="card-header" style="color: var(--yd-red);">STAGE 3: Advance Handling</div>
-            <div class="roster">
-                <div class="roster-title">Finance & Sales</div>
-                <ul class="names">
-                    <li>Mr. Sameer Bansal</li>
-                    <li>Vikas S. & Ajay U. <span>(Finance)</span></li>
-                    <li>Mr. Manish G. & Shashikanth T. <span>(Sales)</span></li>
-                </ul>
-            </div>
-            <div class="action-text">
-                Clock advance payment and upload official receipt to the flow.
-            </div>
-            <div class="sla-box">
-                ⏱️ SLA: <strong>15 Days</strong><br>
-                ⚠️ Escalate: Mr. Navneet Singh & Mr. Sameer Bansal
+            <div class="card-header" style="color: var(--yd-red);">STAGE 3: Advance Handling <span class="toggle-icon">▼</span></div>
+            <div class="collapsible-content">
+                <div class="roster">
+                    <div class="roster-title">Finance & Sales</div>
+                    <ul class="names">
+                        <li>Mr. Sameer Bansal</li>
+                        <li>Vikas S. & Ajay U. <span>(Finance)</span></li>
+                        <li>Mr. Manish G. & Shashikanth T. <span>(Sales)</span></li>
+                    </ul>
+                </div>
+                <div class="action-text">
+                    Clock advance payment and upload official receipt to the flow.
+                </div>
+                <div class="sla-box">
+                    ⏱️ SLA: <strong>15 Days</strong><br>
+                    ⚠️ Escalate: Mr. Navneet Singh & Mr. Sameer Bansal
+                </div>
             </div>
             <div class="arrow arrow-3a-4">➔</div>
         </div>
 
         <div class="card stage-4">
-            <div class="card-header">STAGE 4: PM Allocation</div>
-            <div class="roster">
-                <div class="roster-title">Leadership</div>
-                <ul class="names">
-                    <li>Mr. Varun Jay Rana <span>(COO)</span></li>
-                    <li>Mr. Aseem Gill <span>(VP Projects)</span></li>
-                </ul>
-            </div>
-            <div class="action-text">
-                Allocate Project Manager.<br><br>
-                Trigger alerts to PM, Design Teams, and Sales to prepare scope.
-            </div>
-            <div class="sla-box">
-                ⏱️ SLA: <strong>2 Days</strong><br>
-                ⚠️ Escalate: Mr. Navneet Singh & Mr. Sameer Bansal
+            <div class="card-header">STAGE 4: PM Allocation <span class="toggle-icon">▼</span></div>
+            <div class="collapsible-content">
+                <div class="roster">
+                    <div class="roster-title">Leadership</div>
+                    <ul class="names">
+                        <li>Mr. Varun Jay Rana <span>(COO)</span></li>
+                        <li>Mr. Aseem Gill <span>(VP Projects)</span></li>
+                    </ul>
+                </div>
+                <div class="action-text">
+                    Allocate Project Manager.<br><br>
+                    Trigger alerts to PM, Design Teams, and Sales to prepare scope.
+                </div>
+                <div class="sla-box">
+                    ⏱️ SLA: <strong>2 Days</strong><br>
+                    ⚠️ Escalate: Mr. Navneet Singh & Mr. Sameer Bansal
+                </div>
             </div>
             <div class="arrow arrow-4-5">➔</div>
         </div>
 
         <div class="card stage-5">
-            <div class="card-header">STAGE 5: Kickoff Meeting</div>
-            <div class="roster">
-                <div class="roster-title">Execution</div>
-                <ul class="names">
-                    <li>Allocated Project Manager</li>
-                </ul>
-            </div>
-            <div class="action-text">
-                Conduct kickoff meeting with all departments.<br><br>
-                Submit Minutes of Meeting (MoM) for the project.
-            </div>
-            <div class="sla-box">
-                ⏱️ SLA: <strong>2 Days</strong><br>
-                ⚠️ Escalate: Mr. Navneet Singh & Mr. Sameer Bansal
+            <div class="card-header">STAGE 5: Kickoff Meeting <span class="toggle-icon">▼</span></div>
+            <div class="collapsible-content">
+                <div class="roster">
+                    <div class="roster-title">Execution</div>
+                    <ul class="names">
+                        <li>Allocated Project Manager</li>
+                    </ul>
+                </div>
+                <div class="action-text">
+                    Conduct kickoff meeting with all departments.<br><br>
+                    Submit Minutes of Meeting (MoM) for the project.
+                </div>
+                <div class="sla-box">
+                    ⏱️ SLA: <strong>2 Days</strong><br>
+                    ⚠️ Escalate: Mr. Navneet Singh & Mr. Sameer Bansal
+                </div>
             </div>
             <div class="arrow arrow-5-6">➔</div>
         </div>
 
         <div class="card stage-6" style="background: rgba(39, 174, 96, 0.05); border: 1px solid var(--success-green);">
-            <div class="card-header" style="color: var(--success-green); border-bottom: none; text-align: center; font-size: clamp(1rem, 1.4vw, 1.8rem);">STAGE 6: Realisation</div>
-            <div class="roster" style="background: white; border-left-color: var(--success-green);">
-                <div class="roster-title" style="color: var(--success-green);">System Action</div>
-                <ul class="names" style="text-align:center;">
-                    <li>💻 Realisation Tool</li>
-                </ul>
-            </div>
-            <div class="action-text" style="text-align: center;">
-                <br>✅ <strong>Project Handover Complete</strong><br><br>
-                Project starts running with its active planning mapped in the tool.
+            <div class="card-header" style="color: var(--success-green); border-bottom: none; font-size: clamp(1rem, 1.4vw, 1.8rem);">STAGE 6: Realisation <span class="toggle-icon" style="color:var(--success-green);">▼</span></div>
+            <div class="collapsible-content">
+                <div class="roster" style="background: transparent; border-left-color: var(--success-green);">
+                    <div class="roster-title" style="color: var(--success-green); text-align:center;">System Action</div>
+                    <ul class="names" style="text-align:center;">
+                        <li>💻 Realisation Tool</li>
+                    </ul>
+                </div>
+                <div class="action-text" style="text-align: center;">
+                    ✅ <strong>Project Handover Complete</strong><br><br>
+                    Project starts running with its active planning mapped in the tool.
+                </div>
             </div>
         </div>
 
         <div class="card info-panel">
-            <div class="info-block">
-                <h3>⚡ Global Alerts</h3>
-                <p>System triggers instantly via <strong>WhatsApp & Email</strong>.</p>
-            </div>
-            <div class="info-block">
-                <h3>📈 Executive Reporting</h3>
-                <p>Initiated/Running lists sent to Directors <strong>Every Monday</strong>.</p>
-            </div>
-            <div class="info-block">
-                <h3>👥 Key Executives</h3>
-                <p><strong>CFO:</strong> Mr. Anup Sharma<br><strong>Escalation:</strong> Mr. Navneet S. & Mr. Sameer B.</p>
+            <div class="card-header" style="border:none; margin:0; padding:0; width:100%; display:none;">Global Info <span class="toggle-icon">▼</span></div>
+            <div class="collapsible-content" style="width: 100%;">
+                <div style="display: flex; flex-direction: inherit; gap: inherit; width:100%;">
+                    <div class="info-block">
+                        <h3>⚡ Global Alerts</h3>
+                        <p>System triggers instantly via <strong>WhatsApp & Email</strong>.</p>
+                    </div>
+                    <div class="info-block">
+                        <h3>📈 Executive Reporting</h3>
+                        <p>Initiated/Running lists sent to Directors <strong>Every Monday</strong>.</p>
+                    </div>
+                    <div class="info-block">
+                        <h3>👥 Key Executives</h3>
+                        <p><strong>CFO:</strong> Mr. Anup Sharma<br><strong>Escalation:</strong> Mr. Navneet S. & Mr. Sameer B.</p>
+                    </div>
+                </div>
             </div>
         </div>
 
     </main>
 
     <footer>
-        <span class="footer-note"><strong>Note:</strong> Notifications are system-generated as per workflow. Relevant departments must take timely action; others may ignore.</span>
+        <span class="footer-note"><strong>Note:</strong> Notifications are system-generated as per workflow. Relevant departments must take timely action.</span>
     </footer>
 
-</body>
+    <script>
+        // --- 1. DARK MODE TOGGLE ---
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            if(document.body.classList.contains('dark-mode')){
+                themeToggle.innerHTML = '☀️ Light Mode';
+            } else {
+                themeToggle.innerHTML = '🌙 Dark Mode';
+            }
+        });
 
+        // --- 2. MOBILE TAP-TO-EXPAND (ACCORDION) ---
+        const cards = document.querySelectorAll('.card');
+        
+        cards.forEach(card => {
+            const header = card.querySelector('.card-header');
+            if(header) {
+                header.addEventListener('click', () => {
+                    // Only active on mobile dimensions
+                    if (window.innerWidth <= 1024) {
+                        // Optional: Close other cards when one is clicked (Accordion style)
+                        cards.forEach(c => {
+                            if(c !== card) c.classList.remove('active');
+                        });
+                        // Toggle current card
+                        card.classList.toggle('active');
+                        
+                        // Scroll to the active card smoothly
+                        if(card.classList.contains('active')) {
+                            setTimeout(() => {
+                                card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }, 300); // slight delay to allow CSS transition
+                        }
+                    }
+                });
+            }
+        });
+
+        // Setup info panel to act like a card on mobile
+        const infoPanelHeader = document.querySelector('.info-panel .card-header');
+        if(window.innerWidth <= 1024 && infoPanelHeader) {
+            infoPanelHeader.style.display = 'flex';
+        }
+        window.addEventListener('resize', () => {
+            if(infoPanelHeader) {
+                infoPanelHeader.style.display = window.innerWidth <= 1024 ? 'flex' : 'none';
+            }
+        });
+
+        // --- 3. LIVE SCROLL PROGRESS TRACKER (Mobile Only) ---
+        window.addEventListener('scroll', () => {
+            if (window.innerWidth <= 1024) {
+                const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const progress = (scrollTop / scrollHeight) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+            }
+        });
+    </script>
+
+</body>
 </html>
